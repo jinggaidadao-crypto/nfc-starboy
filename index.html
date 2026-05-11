@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stargirl & Starboy</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+            background-color: #0d0d0d; /* 更深邃的黑 */
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            text-align: center;
+        }
+        .container { padding: 20px; width: 100%; max-width: 320px; }
+        .cover {
+            width: 240px; height: 240px;
+            background-color: #222;
+            border-radius: 12px;
+            margin: 0 auto 30px;
+            /* Starboy专属的暗红氛围光 */
+            box-shadow: 0 15px 40px rgba(220, 20, 60, 0.25); 
+            background-image: url('cover.jpg');
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+        /* 播放时封面微微放大 */
+        .cover.playing { transform: scale(1.03); box-shadow: 0 20px 50px rgba(220, 20, 60, 0.4); }
+        
+        h1 { font-size: 24px; margin-bottom: 6px; font-weight: 600; letter-spacing: 1px; transition: opacity 0.3s; }
+        p { font-size: 14px; color: #888; margin-bottom: 35px; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .controls {
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+        }
+        button {
+            border: none; border-radius: 30px; cursor: pointer; 
+            font-weight: bold; transition: all 0.2s;
+        }
+        button:active { transform: scale(0.92); }
+        
+        .play-btn {
+            background-color: #ffffff; color: #000000;
+            padding: 14px 40px; font-size: 16px; width: 120px;
+        }
+        .next-btn {
+            background-color: #2a2a2a; color: #ffffff;
+            padding: 14px 20px; font-size: 14px; width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cover" id="albumCover"></div>
+        
+        <h1 id="trackTitle">Starboy</h1>
+        <p id="artistName">The Weeknd</p>
+        
+        <div class="controls">
+            <button class="play-btn" id="playBtn">Play</button>
+            <button class="next-btn" id="nextBtn">Next ⏭</button>
+        </div>
+        
+        <audio id="myAudio" src="starboy.mp3"></audio>
+    </div>
+
+    <script>
+        // 播放列表逻辑
+        const playlist = [
+            { title: "Starboy", file: "starboy.mp3", artist: "The Weeknd" },
+            { title: "Stargirl Interlude", file: "stargirl.mp3", artist: "The Weeknd ft. Lana Del Rey" }
+        ];
+        
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+
+        const audio = document.getElementById('myAudio');
+        const playBtn = document.getElementById('playBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const trackTitle = document.getElementById('trackTitle');
+        const artistName = document.getElementById('artistName');
+        const albumCover = document.getElementById('albumCover');
+
+        // 播放/暂停控制
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                playBtn.innerText = 'Play';
+                albumCover.classList.remove('playing');
+            } else {
+                audio.play();
+                playBtn.innerText = 'Pause';
+                albumCover.classList.add('playing');
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // 切歌逻辑
+        function loadTrack(index) {
+            currentTrackIndex = index;
+            audio.src = playlist[index].file;
+            trackTitle.innerText = playlist[index].title;
+            artistName.innerText = playlist[index].artist;
+            
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+
+        function nextTrack() {
+            // 如果是最后一首，切回第一首；否则下一首
+            let nextIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(nextIndex);
+        }
+
+        // 绑定按钮点击事件
+        playBtn.addEventListener('click', togglePlay);
+        nextBtn.addEventListener('click', nextTrack);
+
+        // 自动连播下一首的灵魂功能！
+        audio.addEventListener('ended', function() {
+            if (currentTrackIndex < playlist.length - 1) {
+                nextTrack(); // 自动播放 Stargirl
+            } else {
+                // 两首都放完了，重置状态
+                isPlaying = false;
+                playBtn.innerText = 'Play';
+                albumCover.classList.remove('playing');
+                loadTrack(0); // 切回第一首待命
+            }
+        });
+    </script>
+</body>
+</html>
